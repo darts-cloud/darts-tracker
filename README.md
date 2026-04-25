@@ -1,25 +1,15 @@
-# 🎯 Darts Player Tracker
+# 🎯 Darts Board Camera
 
-Python + OpenCV によるダーツ投擲追跡アプリ。
+ボード正面カメラでダーツの**着弾座標を自動記録**するアプリ。
 
-プレイヤー側カメラで投げたダーツの**軌跡・リリースポイント・速度**を自動記録します。
-ボード認識・スコア計算はスコープ外（別途管理）。
+ゾーン判定・スコア計算なし。飛行追跡なし。座標のみ。
 
 ## 機能
 
-- 📷 プレイヤー側カメラでダーツを自動検出
-- 🟠 リリースポイント（手から離れた位置）を可視化
-- 📈 飛行軌跡をフレームごとに記録
-- ⚡ 60fps 対応（Core Ultra 5 推奨）
-- 💾 `throws.jsonl` に自動保存
-
-## 必要スペック
-
-| 項目 | 最小 | 推奨 |
-|------|------|------|
-| CPU | Core i3 / Ryzen 3 | **Intel Core Ultra 5** |
-| RAM | 4GB | 8GB |
-| カメラ | 60fps 対応 USB カメラ | Logitech C922 / PS Eye |
+- 📷 ボード正面カメラでダーツ着弾を自動検出
+- 📍 ピクセル座標 → ボード正規化座標 (-1〜1) に変換（オプション）
+- 💾 `landings.jsonl` に自動保存
+- ⚡ 60fps 対応
 
 ## インストール
 
@@ -30,31 +20,34 @@ pip install -r requirements.txt
 ## 使い方
 
 ```bash
-python3 player_tracker.py
+python3 board_camera.py
 ```
 
 | キー | 操作 |
 |------|------|
+| `s` | ボード中心をクリックで指定 |
+| `e` | ボード外縁をクリックで指定（正規化用） |
 | `r` | リセット |
 | `q` | 終了 |
 
-## 保存データ形式
+## 保存データ
 
-`throws.jsonl`（1投 = 1行）:
+`landings.jsonl`（1投 = 1行）:
 
 ```json
 {
-  "timestamp": "2026-04-25T21:00:00",
-  "release_point": [640, 400],
-  "landing_point": [1100, 380],
-  "speed_px_s": 1234.5,
-  "frame_count": 18,
-  "trajectory": [[640,400], [700,398], "..."]
+  "timestamp": "2026-04-26T21:00:00",
+  "throw_n": 1,
+  "pixel": [640, 360],
+  "board_norm": [0.12, -0.34],
+  "radius_norm": 0.361
 }
 ```
 
+`board_norm` はキャリブレーションした場合のみ記録。
+
 ## 今後の拡張予定
 
-- [ ] YOLOv8 + OpenVINO（Core Ultra 5 NPU 活用）
-- [ ] リリース角度・回転数推定
-- [ ] マルチカメラ対応（3D軌跡）
+- [ ] YOLOv8 + OpenVINO によるダーツ軸検出精度向上
+- [ ] 複数本同時検出
+- [ ] 統計ビューア
