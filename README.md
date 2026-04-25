@@ -1,25 +1,25 @@
-# 🎯 Darts Tracker
+# 🎯 Darts Player Tracker
 
-Python + OpenCV によるダーツ自動追跡アプリ。
+Python + OpenCV によるダーツ投擲追跡アプリ。
 
-カメラで投げたダーツを検出し、座標・スコア・軌跡・リリースポイントを記録します。
+プレイヤー側カメラで投げたダーツの**軌跡・リリースポイント・速度**を自動記録します。
+ボード認識・スコア計算はスコープ外（別途管理）。
 
 ## 機能
 
-- 📷 カメラによるダーツ自動検出（背景差分 MOG2）
-- 🎯 ダーツボード座標マッピング・スコア自動計算
-- 📈 軌跡・リリースポイントの可視化
-- 💾 投擲データを `throws.jsonl` に保存
-- ⚡ 60fps 対応（Intel Core Ultra / Arc GPU 推奨）
+- 📷 プレイヤー側カメラでダーツを自動検出
+- 🟠 リリースポイント（手から離れた位置）を可視化
+- 📈 飛行軌跡をフレームごとに記録
+- ⚡ 60fps 対応（Core Ultra 5 推奨）
+- 💾 `throws.jsonl` に自動保存
 
 ## 必要スペック
 
 | 項目 | 最小 | 推奨 |
 |------|------|------|
-| CPU | Core i3 / Ryzen 3 | **Core Ultra 5**（NPU対応） |
+| CPU | Core i3 / Ryzen 3 | **Intel Core Ultra 5** |
 | RAM | 4GB | 8GB |
 | カメラ | 60fps 対応 USB カメラ | Logitech C922 / PS Eye |
-| OS | Windows / macOS / Linux | Linux |
 
 ## インストール
 
@@ -30,34 +30,31 @@ pip install -r requirements.txt
 ## 使い方
 
 ```bash
-python3 darts_app.py
+python3 player_tracker.py
 ```
 
 | キー | 操作 |
 |------|------|
-| `c` | ダーツボード自動検出 |
 | `r` | リセット |
 | `q` | 終了 |
 
-## データ形式
+## 保存データ形式
 
 `throws.jsonl`（1投 = 1行）:
 
 ```json
 {
   "timestamp": "2026-04-25T21:00:00",
-  "board_x": 0.12,
-  "board_y": -0.34,
-  "score": 60,
-  "zone": "treble",
   "release_point": [640, 400],
-  "trajectory_points": [[x1,y1], [x2,y2], "..."]
+  "landing_point": [1100, 380],
+  "speed_px_s": 1234.5,
+  "frame_count": 18,
+  "trajectory": [[640,400], [700,398], "..."]
 }
 ```
 
 ## 今後の拡張予定
 
-- [ ] YOLOv8 + OpenVINO（NPU推論）による高精度検出
-- [ ] ゲームモード（501 / Cricket）
-- [ ] 統計・グラフ表示
-- [ ] マルチカメラ対応（リリースポイント専用）
+- [ ] YOLOv8 + OpenVINO（Core Ultra 5 NPU 活用）
+- [ ] リリース角度・回転数推定
+- [ ] マルチカメラ対応（3D軌跡）
