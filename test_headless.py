@@ -8,7 +8,7 @@ import numpy as np
 import json
 from pathlib import Path
 
-VIDEO_FILE  = "test_clip.mp4"
+VIDEO_FILE  = "test_slow.mp4"
 OUTPUT_FILE = "annotated_result.mp4"
 LOG_FILE    = Path("test_landings.jsonl")
 
@@ -22,6 +22,7 @@ MAX_TOTAL_AREA = 2500   # 総変化面積がこれ超え → 人の動き
 WARMUP_FRAMES  = 90
 MIN_DETECT_GAP = 60     # 最小検出間隔（フレーム）
 BORDER         = 70     # フレーム端N px を除外（ボード外ノイズ）
+ROI_BOTTOM_FRAC = 0.5  # フレームの縦この割合より下は無視（ダーツは上半分のみ）
 
 
 def motion_pixels(a: np.ndarray, b: np.ndarray) -> int:
@@ -41,9 +42,10 @@ def find_dart_blob(ref: np.ndarray, current: np.ndarray,
     bin_ = cv2.morphologyEx(bin_, cv2.MORPH_OPEN, k)
     bin_ = cv2.morphologyEx(bin_, cv2.MORPH_CLOSE, k)
 
-    # フレーム端のノイズを除外
+    # フレーム端 + 下半分を除外（ダーツは上半分のみ）
+    roi_bottom = int(h * ROI_BOTTOM_FRAC)
     border_mask = np.zeros_like(bin_)
-    border_mask[BORDER:h-BORDER, BORDER:w-BORDER] = 255
+    border_mask[BORDER:roi_bottom, BORDER:w-BORDER] = 255
     bin_ = cv2.bitwise_and(bin_, border_mask)
 
     contours, _ = cv2.findContours(bin_, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
